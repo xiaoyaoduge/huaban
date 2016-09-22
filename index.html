@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<style>
+    body ul li{
+        margin: 0;padding:0;
+    }
+    *{
+        box-sizing: border-box;
+    }
+    .box{
+        width: 1000px;height: 600px;position: absolute;
+        left: 0;right: 0;top: 0;bottom:0;margin: auto;
+    }
+    .nav{
+        width: 100%;height: 100px;position: absolute;top: 0;
+        left: 0;background: #aaa;font-size: 50px;text-align: center;
+        line-height: 100px;color: #333;
+    }
+    .left{
+        width: 10%;height: 500px;bottom: 0;
+        position: absolute;left: 0;background: #111;
+    }
+    .right{
+        width: 90%;height: 500px;bottom: 0;
+        position: absolute;right: 0;
+    }
+    .copy{
+        width: 100%;height: 100%;position: absolute;
+        left: 0;top: 0;z-index: 100;
+    }
+    canvas{
+        background: #ccc;
+    }
+    .list{
+        width: 100%;cursor: pointer;height:30px;background: #999;
+        font-size: 18px;text-align: center;line-height: 30px;
+        color: #333;font-weight:bold;
+    }
+    .list-reset{
+        width: 100%;cursor: pointer;height:30px;background: #999;
+        font-size: 18px;text-align: center;line-height: 30px;
+        color: #333;font-weight:bold;
+    }
+    .list-reset:hover{
+        background: #666;
+    }
+    .inner{
+        width: 100%;height: 0;list-style: none;overflow: hidden;
+        font-size: 18px;text-align: center;line-height: 30px;margin: 0;padding: 0;
+    }
+    .inner li{
+        width: 100%;height: 20px;font-size: 14px;text-align: center;
+        line-height: 20px;color: #ccc;cursor: pointer;
+    }
+    .inner li:hover{
+        color:red;
+    }
+    .earser{
+        width: 20px;height: 20px;border: 1px solid #000;
+        position: absolute;left: 0;top: 0;border-radius: 50%;
+        display:none;
+    }
+</style>
+<body>
+<div class="box">
+    <div class="nav">画&nbsp;&nbsp;&nbsp;&nbsp;板</div>
+    <div class="left">
+        <div class="list">文件</div>
+        <ul class="inner inner1">
+            <li class="new">新建</li>
+            <li class="save">保存</li>
+        </ul>
+        <div class="list">类型</div>
+        <ul class="inner inner2">
+            <li data-role="line">线</li>
+            <li data-role="rect">矩形</li>
+            <li data-role="arc">圆</li>
+            <li data-role="jiao">多角形</li>
+            <li data-role="bian">多边形</li>
+            <li data-role="pen">铅笔</li>
+        </ul>
+        <div class="list">样式</div>
+        <ul class="inner inner3">
+            <li data-role="fill">填充</li>
+            <li data-role="stroke">边框</li>
+        </ul>
+        <div class="list">粗细</div>
+        <ul class="inner inner4">
+            <li data-role="1">细</li>
+            <li data-role="10">中</li>
+            <li data-role="50">粗</li>
+            <li><input type="number" id="number" placeholder="请输入数字" style="width: 100%"></li>
+        </ul>
+        <div class="list">橡皮</div>
+        <ul class="inner inner4">
+            <li><input type="number" id="number1" placeholder="请输入数字" style="width: 100%"></li>
+        </ul>
+        <div class="list-reset">清除</div>
+        <span style="color: #ccc">填充：</span><input type="color" class="color1">
+        <span style="color: #ccc">边框：</span><input type="color" class="color2">
+    </div>
+    <div class="right">
+        <canvas width="898" height="498">
+            您的浏览器不支持画布！
+        </canvas>
+        <div class="copy"></div>
+        <div class="earser"></div>
+    </div>
+</div>
+</body>
+<script src="jquery.js"></script>
+<script src="canvas.js"></script>
+<script>
+    $(function(){
+        var flagH=true;
+        $(".list").click(function(){
+            if(flagH){
+                var index=$(".list").index(this);
+                if(index==0){
+                    $(".inner").eq(index).animate({height:40})
+                }
+                if(index==1){
+                    $(".inner").eq(index).animate({height:120})
+                }
+                if(index==2){
+                    $(".inner").eq(index).animate({height:40})
+                }
+                if(index==3){
+                    $(".inner").eq(index).animate({height:80})
+                }
+                if(index==4){
+                    $(".inner").eq(index).animate({height:20})
+                }
+                flagH=false
+            }else{
+                var index=$(".list").index(this)
+                $(".inner").eq(index).animate({height:0})
+                flagH=true
+            }
+        });
+        $(".inner li:not(input)").click(function(){
+            $(".inner li:not(input)").css("color","#ccc")
+            $(this).css("color","red")
+        })
+        var canvas=$("canvas")[0];
+        var cobj=canvas.getContext("2d");
+        var copy=$(".copy")[0];
+        var xp=$(".earser")[0];
+        var obj=new shape (copy,cobj,xp);
+        obj.draw();
+        //类型
+        $(".inner2 li").click(function(){
+            if($(this).attr("data-role")=="pen"){
+                obj.pen();
+            }else{
+                var types=$(this).attr("data-role");
+                if(types=="bian"){
+                    obj.bianNum=prompt("请输入数字",5)
+                }
+                if(types=="jiao"){
+                    obj.jiaoNum=prompt("请输入数字",5)
+                }
+                obj.type=$(this).attr("data-role");
+                obj.draw();
+            }
+        });
+        //橡皮擦
+        $(".list:last").click(function(){
+            obj.clear();
+        });
+        $("#number1").change(function(){
+            obj.xpsize=$(this).val();
+        });
+        //填充
+        $(".inner3 li").click(function(){
+            obj.style=$(this).attr("data-role");
+            obj.draw();
+        });
+        //粗细
+        $(".inner4 li:not(input)").click(function(){
+            obj.lineWidth=$(this).attr("data-role");
+            obj.draw();
+        });
+        $("#number").change(function(){
+            obj.lineWidth=$(this).val();
+            obj.draw();
+        });
+        //清除
+        $(".list-reset").click(function(){
+            obj.reset();
+        })
+        //颜色
+        $(".color1").change(function(){
+            obj.fillStyle=$(this).val();
+            obj.draw();
+        });
+        $(".color2").change(function(){
+            obj.strokeStyle=$(this).val();
+            obj.draw();
+        });
+        //保存
+        $(".save").click(function(){
+            if(obj.history.length>0){
+                location.href = canvas.toDataURL().replace("image/png","stream/octet");
+            }
+        });
+        $(".new").click(function(){
+            if(obj.history.length>0){
+                var ques=confirm("是否保存")
+                if(ques){
+                    location.href = canvas.toDataURL().replace("image/png","stream/octet")
+                }
+                obj.history=[];
+                cobj.clearRect(0,0,canvas.width,canvas.height)
+            }
+        })
+
+
+
+
+
+
+
+
+
+
+    })
+</script>
+</html>
